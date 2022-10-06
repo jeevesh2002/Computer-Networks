@@ -5,7 +5,7 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
-#define MAX 80
+#define MAX 8000
 #define PORT 8000
 
 #include <unistd.h>
@@ -17,26 +17,36 @@ void func(int connfd)
 {
     char buff[MAX];
     int n;
-    // infinite loop for chat
-    for (;;) {
-        bzero(buff, MAX);
 
-        // read the message from client and copy it in buffer
-        recv(connfd, buff, sizeof(buff),0);
-        // print buffer which contains the client contents
-        printf("From client: %s\n", buff);
-        // and send that buffer to client
-        send(connfd, buff, sizeof(buff),0);
-        bzero(buff, MAX);
-        n = 0;
-                
-
-        // if msg contains "Exit" then server exit and chat ended.
-        if (strncmp("exit", buff, 4) == 0) {
-            printf("Server Exit...\n");
-            break;
-        }
+    bzero(buff,sizeof(buff));
+    // read the message from client and copy it in buffer
+    recv(connfd, buff, sizeof(buff),0);
+    // print buffer which contains the client contents
+    printf("From client: %s", buff);
+        
+    int fd = open(buff, O_RDONLY);
+    
+    if(fd==-1){
+        printf("Unable to open file!\n");
+        strcpy(buff,"Unable to open file");
     }
+        
+    else{
+        read(fd,buff,sizeof(buff));
+    }
+    // and send that buffer to client
+    send(connfd, buff, sizeof(buff),0);
+    bzero(buff, MAX);
+    n = 0;
+                
+    close(fd);
+    // if msg contains "Exit" then server exit and chat ended.
+    if (strncmp("Unable to open file", buff, 4) == 0) {
+        printf("Server Exit...\n");
+        return;
+    }
+    
+
 }
 
 // Driver function
